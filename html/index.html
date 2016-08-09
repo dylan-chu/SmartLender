@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <script src="web3.min.js"></script>
+    	<link rel="stylesheet" type="text/css" href="normalize.css">
+    	<link rel="stylesheet" type="text/css" href="skeleton.css">
+    <title></title>
+  </head>
+  <body style="padding: 15px">
+
+  <div class="row">
+    <div class="one-half column">
+        <h4>Tools</h4>
+    	<div>
+            Click da' button to deploy contract<br >
+            <button class="button-primary" onclick="deploy()">Deploy!</button>
+        </div>
+
+        <hr />
+        <div>
+            Deploy from Bytecode and Interface:<br >
+            Bytecode:<br>
+            <textarea id="bytecode"></textarea>
+            <br clear="all">
+
+            Interface:<br>
+            <textarea id="interface"></textarea>
+            <br clear="all">
+
+            <button class="button-primary" onclick="deploy()">Deploy from bytecode!</button>
+
+        </div>
+
+        <hr />
+        <h2>Smart Lender</h2>
+        Collateral: <input type="text" id="collateral"><br>
+        <button class="button-primary" onclick="collaterizeFunds()">Collateralize Funds!</button>
+
+        <br /><br />
+        <button class="button-primary" onclick="unfreezeCollateral()">Unfreeze Collateral</button>
+
+        <br /><br />
+        Lender: <input type="text" id="lender" value="0x56a0F6ddA7d0fd4AB17FCC5107190BE05bBA7d83"><br>
+        Amount: <input type="text" id="amt1"><br>
+        <button class="button-primary" onclick="requestLoan()">Request Loan</button>
+
+        <br /><br />
+        <button class="button-primary" onclick="cancelRequest()">Cancel Request</button>
+
+        <br /><br />
+        <!--button class="button-primary" onclick="getTotalCollateralAmt()">Get Total Collateral Amount</button-->
+        <a onclick="getTotalCollateralAmt()">Get total collateral amounts</a>
+
+        <br /><br />
+        Amount: <input type="text" id="amt2"><br>
+        <button class="button-primary" onclick="approveLoan()">Approve Loan</button>
+
+        <br /><br />
+        Amount: <input type="text" id="amt3"><br>
+        Pay Confirm Msg: <input type="text" id="pmsg"><br>
+        <button class="button-primary" onclick="requestPayment()">Request Payment</button>
+
+        <br /><br />
+        Amount: <input type="text" id="amt4"><br>
+        Pay Key: <input type="text" id="pkey"><br>
+        <button class="button-primary" onclick="payLoan()">Pay Loan</button>
+
+        <br /><br />
+        <button class="button-primary" onclick="confiscateCollateral()">Confiscate Collateral</button>
+
+    </div>
+    <div class="one-half column">
+        <h4>Output</h4>
+        <button onclick="clearOutput()">Clear</button>
+
+    	<div id="logging">
+    	</div>
+    	
+    </div>
+  </div>
+  
+    <script>
+
+        var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+        web3.eth.defaultAccount = web3.eth.accounts[0];
+        // var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+
+
+        // set current provider
+        /*
+        if(typeof window.web3 !== "undefined" && typeof window.web3.currentProvider !== "undefined") {
+            var web3 = new Web3(window.web3.currentProvider);
+        } else {
+            var  web3 = new Web3(new Web3.providers.HttpProvider("http://10.0.3.174:8545"));
+        }
+        */
+
+        var simplestorageContract = web3.eth.contract([{"constant":false,"inputs":[],"name":"collateralizeFunds","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"confiscateCollateral","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"lndr","type":"address"},{"name":"minCancelTime","type":"uint256"},{"name":"mLoanAmt","type":"uint256"}],"name":"requestLoan","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"paymentAmt","type":"uint256"},{"name":"payKey","type":"bytes32"}],"name":"payLoan","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"lnAmt","type":"uint256"},{"name":"loanTime","type":"uint256"}],"name":"approveLoan","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"cancelRequest","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"amt","type":"uint256"},{"name":"payConfirm","type":"bytes32"}],"name":"requestPayment","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"state","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[],"name":"unfreezeCollateral","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"getTotalCollateralAmt","outputs":[{"name":"ttlColAmt","type":"uint256"}],"type":"function"},{"inputs":[{"name":"_author","type":"address"}],"type":"constructor"}]);
+        var bytecode = '6060604052604051602080610965833981016040528080519060200190919050505b60008190506000600060006101000a81548160ff021916908302179055505b5050610915806100506000396000f3606060405236156100a0576000357c0100000000000000000000000000000000000000000000000000000000900480633ae5db40146100ad5780634ae89980146100bc5780636f77ff55146100cb5780637771c0f4146100f55780637a64649214610116578063851b16f514610137578063b65f782f14610146578063c19d93fb14610167578063ccb9f0501461018a578063e1fcd80c14610199576100a0565b6100ab5b610002565b565b005b6100ba60048050506101bc565b005b6100c96004805050610238565b005b6100f36004808035906020019091908035906020019091908035906020019091905050610351565b005b6101146004808035906020019091908035906020019091905050610436565b005b6101356004808035906020019091908035906020019091905050610509565b005b61014460048050506105eb565b005b61016560048080359060200190919080359060200190919050506106d0565b005b6101746004805050610771565b6040518082815260200191505060405180910390f35b6101976004805050610784565b005b6101a66004805050610850565b6040518082815260200191505060405180910390f35b6000600060009054906101000a900460ff1660028114156101dc57610002565b600d60005060003373ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000509150348260000160008282825054019250508190555034600a600082828250540192505081905550505b50565b33600c60009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614151561029557610002565b600060009054906101000a900460ff1660008114806102b45750600181145b156102be57610002565b600760005054421180156102db5750600460005054600560005054105b1561034c5760011515600c60009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166000600a60005054604051809050600060405180830381858888f19350505050151514151561034b57610002565b5b50505b565b33600b60009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff161415156103ae57610002565b600060009054906101000a900460ff1660028114156103cc57610002565b6001600060006101000a81548160ff0219169083021790555084600c60006101000a81548173ffffffffffffffffffffffffffffffffffffffff0219169083021790555082600360005081905550836002600050819055504260016000508190555050505b505050565b33600b60009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614151561049357610002565b600060009054906101000a900460ff1660008114806104b25750600181145b156104bc57610002565b600960005054600019168360405180826000191681526020019150506040518091039020600019161415156104f057610002565b83600560008282825054019250508190555050505b5050565b33600c60009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614151561056657610002565b600060009054906101000a900460ff1660008114806105855750600281145b1561058f57610002565b60036000505460046000505410156105a657610002565b836004600050819055506002600060006101000a81548160ff0219169083021790555042600660005081905550826006600050540160076000508190555050505b5050565b33600b60009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614151561064857610002565b600060009054906101000a900460ff1660008114806106675750600281145b1561067157610002565b600260005054600160005054014211156106cb576000600c60006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908302179055506000600060006101000a81548160ff021916908302179055505b50505b565b33600c60009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614151561072d57610002565b600060009054906101000a900460ff16600081148061074c5750600181145b1561075657610002565b836008600050819055508260096000508190555050505b5050565b600060009054906101000a900460ff1681565b60006000600060009054906101000a900460ff166001811415806107a9575060028114155b156107b357610002565b600d60005060003373ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000509250826000016000505491506000836000016000508190555081600a6000828282505403925050819055503373ffffffffffffffffffffffffffffffffffffffff16600083604051809050600060405180830381858888f19350505050151561084a57610002565b505b5050565b6000600b60009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161415806108fd5750600c60009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614155b1561090757610002565b600a60005054905080505b9056';
+
+        logToDiv = function(stuff) {
+            loggingDiv = document.getElementById('logging');
+            loggingDiv.innerHTML += stuff + "<br>";
+        }
+
+        function clearOutput() {
+            document.getElementById('logging').innerHTML = '';
+        }
+
+
+
+        function deploy() {
+            // console.log(web3.isConnected())
+            var bytecodeFromForm = document.getElementById('bytecode').value;
+            var interfaceFromForm = document.getElementById('interface').value;
+
+            if(!!bytecodeFromForm && !!interfaceFromForm) {
+                logToDiv("Bytecode:<br>" + bytecodeFromForm);
+                logToDiv("Interface:<br>" + interfaceFromForm);
+
+
+                // NOTE: Evil eval!
+                simplestorageContract = web3.eth.contract(eval(interfaceFromForm));
+                bytecode = bytecodeFromForm;
+            }
+
+            var simplestorage = simplestorageContract.new(
+               {
+                 from: web3.eth.accounts[0],
+                 data: bytecode,
+                 gas: 4700000
+               }, function (e, contract){
+                if (typeof contract.address !== 'undefined') {
+                     logToDiv('Contract mined! address: <br>' + contract.address + '<br> transactionHash: ' + contract.transactionHash);
+                     Address = contract.address;
+                }
+             })
+        }
+
+
+
+        function setValue() {
+            var val = document.getElementById('myValue').value;
+            var Transaction = simplestorageContract.at(Address);
+            var TxHash = Transaction["setValue"].sendTransaction(val, {from: web3.eth.accounts[0]}, function(err, address) {
+             logToDiv(address);
+            })
+        }
+
+
+        function getValue() {
+            var p = simplestorageContract.at(Address);
+            var returnValue = p.getValue().toString();
+            logToDiv(returnValue);
+            document.getElementById("result").innerHTML=returnValue;
+        }
+
+        function playToss(choice) {
+            logToDiv("Using address: <br>" + Address);
+            Transaction = simplestorageContract.at(Address);
+            TxHash = Transaction["play"].sendTransaction(parseInt(choice), {from: web3.eth.accounts[0], value: 10}, function(err, address) {
+                logToDiv(address);
+            })
+
+            /*
+             TxHash = Transaction["play"].sendTransaction(parseInt(choice), {from: web3.eth.accounts[0]}, function(err, address) {
+             logToDiv(address);
+             })
+             */
+        }
+
+        function viewResult() {
+            var returnValue = Transaction.result().toString();
+            logToDiv(returnValue);
+        }
+
+
+        function collaterizeFunds() {
+            var val = document.getElementById('collateral').value;
+            Transaction = simplestorageContract.at(Address);
+            var TxHash = Transaction["collateralizeFunds"].sendTransaction({from: web3.eth.accounts[0], value: val}, function(err, address) {
+                logToDiv(address);
+            })
+        }
+
+	function unfreezeCollateral () {
+            Transaction = simplestorageContract.at(Address);
+            var TxHash = Transaction["unfreezeCollateral"].sendTransaction({from: web3.eth.accounts[0]}, function(err, address) {
+                logToDiv(address);
+            })
+	}
+
+	function requestLoan() {
+            var lender = document.getElementById('lender').value;
+	    var amt = document.getElementById('amt1').value;
+            Transaction = simplestorageContract.at(Address);
+            var TxHash = Transaction["requestLoan"].sendTransaction({from: web3.eth.accounts[0], lndr: lender, mLoanAmt: amt}, function(err, address) {
+                logToDiv(address);
+            })
+	}
+
+	function cancelRequest() {
+            Transaction = simplestorageContract.at(Address);
+            var TxHash = Transaction["cancelRequest"].sendTransaction({from: web3.eth.accounts[0]}, function(err, address) {
+                logToDiv(address);
+            })
+	}
+
+        function getTotalCollateralAmt() {
+            var p = simplestorageContract.at(Address);
+            var returnValue = p.getTotalCollateralAmt().toString();
+            logToDiv(returnValue);
+
+        }
+
+	function approveLoan() {
+		var amt = document.getElementById('amt2').value;
+            Transaction = simplestorageContract.at(Address);
+            var TxHash = Transaction["approveLoan"].sendTransaction({from: web3.eth.accounts[0], lnAmt: amt, loanTime: 100}, function(err, address) {
+                logToDiv(address);
+            })
+	}
+ 
+    	function requestPayment() {
+		var amount = document.getElementById('amt3').value;
+		var cmsg = document.getElementById('pmsg').value;
+            Transaction = simplestorageContract.at(Address);
+            var TxHash = Transaction["requestPayment"].sendTransaction({from: web3.eth.accounts[0], amt: amount, payConfirm: cmsg}, function(err, address) {
+                logToDiv(address);
+            })
+	} 
+
+    	function payLoan() {
+		var amount = document.getElementById('amt4').value;
+		var pkey = document.getElementById('pkey').value;
+            Transaction = simplestorageContract.at(Address);
+            var TxHash = Transaction["payLoan"].sendTransaction({from: web3.eth.accounts[0], paymentAmt: amount, payKey: pkey}, function(err, address) {
+                logToDiv(address);
+            })
+	} 
+
+    	function confiscateCollateral () {
+            Transaction = simplestorageContract.at(Address);
+            var TxHash = Transaction["confiscateCollateral"].sendTransaction({from: web3.eth.accounts[0]}, function(err, address) {
+                logToDiv(address);
+            })
+	} 
+
+    </script>
+
+  </body>
+</html>

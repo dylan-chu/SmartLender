@@ -3,7 +3,7 @@ SmartLender is a smart contract written for the Ethereum blockchain.  Its purpos
 A group of 4 (Yogi Golle, Shubbankar Singh, Obim Okongwu and Dylan Chu) initially worked on this project.  
 
 # Coding Language
-The contract is written in [Solidity] (https://solidity.readthedocs.io/en/latest/index.html).
+The contract is written in [Solidity](https://solidity.readthedocs.io/en/latest/index.html).
 
 # How It Works
 1. A borrower deploys the contract on the blockchain.
@@ -18,5 +18,5 @@ The contract is written in [Solidity] (https://solidity.readthedocs.io/en/latest
 # How to Deploy It to a Ethereum TestNet
 To compile the contract to bytecode, paste the code into the browser at http://ethereum.github.io/browser-solidity/#version=soljson-latest.js
 
-* Instructions for deploying to the [Morden TestNet] (https://github.com/ethereum/wiki/wiki/Morden) will be available in the future.
+* Instructions for deploying to the [Morden TestNet](https://github.com/ethereum/wiki/wiki/Morden) will be available in the future.
 
